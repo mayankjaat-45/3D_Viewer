@@ -1,0 +1,66 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 320px;
+  background: #020617;
+  padding: 20px;
+  border-right: 1px solid #1e293b;
+}
+
+.sidebar h1 {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+.control-card {
+  background: #020617;
+  border: 1px solid #1e293b;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.control-card label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+}
+
+.control-card input[type="file"],
+.control-card input[type="color"] {
+  width: 100%;
+}
+
+.control-card button {
+  width: 100%;
+  padding: 8px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.control-card button:hover {
+  background: #1e40af;
+}
+
+.viewer-container {
+  flex: 1;
+  padding: 12px;
+}
