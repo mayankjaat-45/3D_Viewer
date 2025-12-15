@@ -7,74 +7,46 @@ import { fileURLToPath } from "url";
 import connectDb from "./config/db.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
-import { errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
 
 const app = express();
 
-// ES Modules fix
+// ES module fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ ALLOWED ORIGINS (ARRAY — VERY IMPORTANT)
-const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.FRONTEND_URL,
-].filter(Boolean); // removes undefined safely
-
-// ✅ CORS CONFIG
+// ✅ CORS (API)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // Postman, server requests
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error(`CORS blocked: ${origin}`));
-    },
-    credentials: true,
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+    ],
   })
 );
 
-// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve GLB files WITH proper CORS
+// ✅ THIS IS THE MOST IMPORTANT FIX
+// Serve GLB files with OPEN CORS
 app.use(
   "/uploads",
-  (req, res, next) => {
-    const origin = req.headers.origin;
-
-    if (
-      origin === "http://localhost:5173" ||
-      origin === process.env.FRONTEND_URL
-    ) {
-      res.setHeader("Access-Control-Allow-Origin", origin);
-    }
-
-    res.setHeader("Access-Control-Allow-Methods", "GET");
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-
-    next();
-  },
-  express.static(path.join(__dirname, "uploads"))
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+    },
+  })
 );
 
 // Routes
 app.use("/api/upload", uploadRoutes);
 app.use("/api/settings", settingsRoutes);
 
-// Error handler
-app.use(errorHandler);
-
-// DB + Server
+// DB
 connectDb();
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on ${PORT}`)
+);
