@@ -1,4 +1,9 @@
+// backend/middleware/errorMiddleware.js
+
 export const errorHandler = (err, req, res, next) => {
-  const status = err.status || 500;
-  res.status(status).json({ message: err.message || "Server Error" });
+  console.error("❌ Error:", err.message);
+  res.status(500).json({
+    success: false,
+    message: err.message || "Server Error",
+  });
 };

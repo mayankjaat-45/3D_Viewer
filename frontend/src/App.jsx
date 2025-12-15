@@ -1,49 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Viewer from "./components/Viewer";
 import Controls from "./components/Controls";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { fetchSettingsApi } from "./api";
 
-export default function App() {
-  const [modelUrl, setModelUrl] = useState(null);
-  const [bgColor, setBgColor] = useState("#0f172a");
+function App() {
+  const [modelUrl, setModelUrl] = useState("");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [wireframe, setWireframe] = useState(false);
-  const [resetCamera, setResetCamera] = useState(() => () => {});
 
-  // Fetch last saved settings on load
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const settings = await fetchSettingsApi();
-        if (!settings) return;
-        if (settings.modelUrl) setModelUrl(settings.modelUrl);
-        if (settings.backgroundColor) setBgColor(settings.backgroundColor);
-        setWireframe(settings.wireframe);
-      } catch (err) {
-        console.warn("Backend not reachable. Running frontend-only mode.");
-      }
-    };
-    loadSettings();
+    fetchSettingsApi()
+      .then((data) => {
+        if (data) {
+          setModelUrl(data.modelUrl);
+          setBgColor(data.backgroundColor || "#ffffff");
+          setWireframe(data.wireframe || false);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return (
-    <div className="app">
+    <div style={{ padding: 20 }}>
+      <h2>3D Product Viewer</h2>
+
       <Controls
-        setModelUrl={setModelUrl}
-        bgColor={bgColor}
-        setBgColor={setBgColor}
-        wireframe={wireframe}
-        setWireframe={setWireframe}
-        resetCamera={resetCamera}
+        onModelChange={setModelUrl}
+        onSettingsChange={(bg, wf) => {
+          setBgColor(bg);
+          setWireframe(wf);
+        }}
       />
 
-      <div className="viewer-container">
-        <Viewer
-          modelUrl={modelUrl}
-          bgColor={bgColor}
-          wireframe={wireframe}
-          setReset={setResetCamera}
-        />
-      </div>
+      <ErrorBoundary>
+        <Viewer modelUrl={modelUrl} bgColor={bgColor} wireframe={wireframe} />
+      </ErrorBoundary>
     </div>
   );
 }
+
+export default App;
